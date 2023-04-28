@@ -33,19 +33,29 @@ async def set_city(update, context):
 
 async def new_city(update, context):
     context.user_data['city'] = update.message.text
+    logger.info(update.message.text)
     await update.message.reply_text(f"Город изменен на {update.message.text}.")
     return ConversationHandler.END
 
 
 async def show_weather(update, context):
     emoji_codes = {
-        "Clear": "Ясно \U00002600",
-        "Clouds": "Облачно \U00002601",
-        "Rain": "Дождь \U00002614",
-        "Drizzle": "Дождь \U00002614",
-        "Thunderstorm": "Гроза \U000026A1",
-        "Snow": "Снег \U0001F328",
-        "Mist": "Туман \U0001F32B"
+        "Clear": ["Ясно \U00002600", "П.Чайковский - 'Русский трепак' из балета 'Щелкунчик'"],
+        "Clouds": ["Облачно \U00002601", "Ф.Шопен - 'Ноктюрн №8 Ре-бемоль мажор'"],
+        "Rain": ["Дождь \U00002614", "И.Штраус - 'Полька пиццикато'"],
+        "Drizzle": ["Дождь \U00002614", "И.Штраус - 'Полька пиццикато'"],
+        "Thunderstorm": ["Гроза \U000026A1", "Л.Бетховен - 'Соната №14. Часть 3'"],
+        "Snow": ["Снег \U0001F328", "Г.Свиридов - 'Романс' из сюиты 'Метель'"],
+        "Mist": ["Туман \U0001F32B", "А.Шнитке - тема из к/ф 'Сказка странствий'"]
+    }
+    music_names = {
+        "Clear": "clear.mp3",
+        "Clouds": "clouds.mp3",
+        "Rain": "rain.mp3",
+        "Drizzle": "rain.mp3",
+        "Thunderstorm": "thunderstorm.mp3",
+        "Snow": "snow.mp3",
+        "Mist": "mist.mp3"
     }
     try:
         s = 'http://api.openweathermap.org/data/2.5/weather'
@@ -63,7 +73,7 @@ async def show_weather(update, context):
 
         sky = data["weather"][0]["main"]
         if sky in emoji_codes:
-            wd = emoji_codes[sky]
+            wd = emoji_codes[sky][0]
         else:
             wd = "Посмотри сам! Никак не разберу, что там за погода..."
 
@@ -72,7 +82,6 @@ async def show_weather(update, context):
         temp_max = data["main"]["temp_max"]
         temp_min = data["main"]["temp_min"]
         wind_speed = data["wind"]["speed"]
-        wind_gust = data["wind"]["gust"]
 
         sunrise_time = datetime.datetime.fromtimestamp(data["sys"]["sunrise"])
         sunset_time = datetime.datetime.fromtimestamp(data["sys"]["sunset"])
@@ -84,13 +93,18 @@ async def show_weather(update, context):
                                         f"За окном: {wd}\n"
                                         f"\nДавление: {pressure} мм.рт.ст.\n"
                                         f"Влажность: {humidity}%.\n"
-                                        f"Ветер {wind_speed}м/с с порывами до {wind_gust}м/с.\n"
+                                        f"Ветер {wind_speed}м/с.\n"
                                         f"\nДиапазон температур в этот день: {temp_min}-{temp_max}°C.\n"
                                         f"Время восхода: {sunrise_time.strftime('%H:%M')}.\n"
                                         f"Время заката: {sunset_time.strftime('%H:%M')}.\n"
                                         f"Продолжительность светового дня: {day_length}."
                                         f"\nХорошего дня! :)")
-    except:
+        if sky in emoji_codes:
+            file_name = music_names[sky]
+            await update.message.reply_text(emoji_codes[sky][1])
+            await context.bot.send_audio(update.message.chat_id, f'music/{file_name}')
+    except Exception as ex:
+        print(ex)
         await update.message.reply_text('Что-то не выходит. Пожалуйста, проверьте название города.')
 
 
