@@ -20,20 +20,20 @@ markup = ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=False)
 async def start(update, context):
     user = update.effective_user
     await update.message.reply_html(
-        f"Привет, {user.mention_html()}! Я погодный бот. С моей помощью ты сможешь узнать погоду в любом городе мира! "
+        f"Привет, {user.mention_html()}! Я погодный бот. С моей помощью ты сможешь узнать погоду в любом городе мира и "
+        f"послушать подходящую под неё музыку."
         f"Чтобы разобраться, как я работаю, нажми на '/help'.\nУдачной работы со мной! :)",
         reply_markup=markup
     )
 
 
 async def set_city(update, context):
-    await update.message.reply_text(f"Пожалуйста, введите название своего города латиницей с маленькой буквы.")
+    await update.message.reply_text(f"Пожалуйста, введите название своего города латиницей.")
     return 1
 
 
 async def new_city(update, context):
     context.user_data['city'] = update.message.text
-    logger.info(update.message.text)
     await update.message.reply_text(f"Город изменен на {update.message.text}.")
     return ConversationHandler.END
 
@@ -109,15 +109,16 @@ async def show_weather(update, context):
 
 
 async def help_command(update, context):
-    await update.message.reply_text(f"Чтобы задать город, нажми на '/set_city'."
-                                    f"Чтобы узнать погоду, нажми на '/show_weather'.")
+    await update.message.reply_text(f"Чтобы задать город, нажмите на '/set_city'."
+                                    f"Чтобы узнать погоду и получить подходящую музыку"
+                                    f", нажмите на '/show_weather'."
+                                    f"Чтобы закрыть поле команд, нажмите '/close'.")
 
 
 async def close_keyboard(update, context):
-    await update.message.reply_text(
-        "Пока!",
-        reply_markup=ReplyKeyboardRemove()
-    )
+    await update.message.reply_text(f"Чтобы снова открыть поле команд, используйте /start.\nПока!",
+                                    reply_markup=ReplyKeyboardRemove()
+                                    )
 
 
 def main():
